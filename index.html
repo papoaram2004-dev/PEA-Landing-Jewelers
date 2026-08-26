@@ -679,6 +679,7 @@ var getCookie=function(n){var m=document.cookie.match('(^|;)\\s*'+n+'\\s*=\\s*([
 var params=new URLSearchParams(window.location.search);
 try{
   fetch(N8N_PAGEVIEW_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},keepalive:true,body:JSON.stringify({
+    secret:'sndkfdaknffdns2243343432',
     event_id:window.metaEventId,
     event_name:'PageView',
     event_time:Math.floor(Date.now()/1000),
