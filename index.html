@@ -640,14 +640,7 @@ footer{padding:2rem 2.5rem;border-top:0.5px solid var(--border);display:flex;jus
   <span class="footer-copy">© 2026 PEA Marketing. All rights reserved.</span>
 </footer>
 
-<script>
-// FB Pixel — track CTA clicks as Lead events
-document.querySelectorAll('.btn-glow, .nav-pill').forEach(function(btn){
-  btn.addEventListener('click', function(){
-    if(typeof fbq !== 'undefined') fbq('track', 'Lead');
-  });
-});
-</script>
+<script></script>
 
 <!-- Sticky mobile CTA -->
 <div class="sticky-cta" id="stickyCta">
@@ -667,18 +660,38 @@ document.querySelectorAll('.btn-glow, .nav-pill').forEach(function(btn){
 })();
 </script>
 
-<!-- Facebook Pixel -->
+<!-- Facebook Pixel + event ID for browser/server dedup -->
 <script>
+// Shared event ID — same ID must be sent on the matching server (CAPI) event
+window.metaEventId = ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16));
+
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
 n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
 document,'script','https://connect.facebook.net/en_US/fbevents.js');
 fbq('init','702422362027631');
-fbq('track','PageView');
+fbq('track','PageView',{},{eventID:window.metaEventId});
+
+// n8n PageView webhook — same event_id as the browser PageView above (dedup)
+var N8N_PAGEVIEW_WEBHOOK = 'https://n8n-ls6p.srv1846570.hstgr.cloud/webhook/fa5a3ade-12be-4e54-853f-9529886638da';
+var getCookie=function(n){var m=document.cookie.match('(^|;)\\s*'+n+'\\s*=\\s*([^;]+)');return m?m.pop():'';};
+var params=new URLSearchParams(window.location.search);
+try{
+  fetch(N8N_PAGEVIEW_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/json'},keepalive:true,body:JSON.stringify({
+    event_id:window.metaEventId,
+    event_name:'PageView',
+    event_time:Math.floor(Date.now()/1000),
+    event_source_url:window.location.href,
+    client_user_agent:navigator.userAgent,
+    document_referrer:document.referrer,
+    fbclid:params.get('fbclid')||'',
+    fbp:getCookie('_fbp'),
+    fbc:getCookie('_fbc')
+  })});
+}catch(e){}
 </script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=702422362027631&ev=PageView&noscript=1"/></noscript>
 
 </body>
 </html>
-
